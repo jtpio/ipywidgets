@@ -18,6 +18,8 @@ class DropWidget(DOMWidget, CoreWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._drop_handlers = CallbackDispatcher()
+        self._dragenter_handlers = CallbackDispatcher()
+        self._dragleave_handlers = CallbackDispatcher()
         self.on_msg(self._handle_dragdrop_msg)
 
     def on_drop(self, callback, remove=False):
@@ -33,16 +35,53 @@ class DropWidget(DOMWidget, CoreWidget):
         """
         self._drop_handlers.register_callback(callback, remove=remove)
 
+    def on_dragenter(self, callback, remove=False):
+        """ Register a callback to execute when an element enters a DropWidget.
+
+        The callback will be called with two arguments, the DropWidget
+        widget instance, and the dropped element data.
+
+        Parameters
+        ----------
+        remove: bool (optional)
+            Set to true to remove the callback from the list of callbacks.
+        """
+        self._dragenter_handlers.register_callback(callback, remove=remove)
+
+    def on_dragleave(self, callback, remove=False):
+        """ Register a callback to execute when an element leaves a DropWidget.
+
+        The callback will be called with two arguments, the DropWidget
+        widget instance, and the dropped element data.
+
+        Parameters
+        ----------
+        remove: bool (optional)
+            Set to true to remove the callback from the list of callbacks.
+        """
+        self._dragleave_handlers.register_callback(callback, remove=remove)
+
     def drop(self, data):
         """ Programmatically trigger a drop event.
         This will call the callbacks registered to the  drop event.
         """
-
         if data.get('application/vnd.jupyter.widget-view+json'):
             widget_mime = json.loads(data['application/vnd.jupyter.widget-view+json'])
             data['widget'] = widget_serialization['from_json']('IPY_MODEL_' + widget_mime['model_id'])
 
         self._drop_handlers(self, data)
+
+    def dragenter(self):
+        """ Programmatically trigger a dragenter event.
+        This will call the callbacks registered to the dragenter event.
+        """
+        self._dragenter_handlers(self)
+
+    def dragleave(self):
+        """ Programmatically trigger a dragleave event.
+        This will call the callbacks registered to the dragleave event.
+        """
+        self._dragleave_handlers(self)
 
     def _handle_dragdrop_msg(self, _, content, buffers):
         """ Handle a msg from the front-end.
@@ -52,8 +91,13 @@ class DropWidget(DOMWidget, CoreWidget):
         content: dict
             Content of the msg.
         """
-        if content.get('event', '') == 'drop':
+        event = content.get('event', '')
+        if event == 'drop':
             self.drop(content.get('data', {}))
+        elif event == 'dragenter':
+            self.dragenter()
+        elif event == 'dragleave':
+            self.dragleave()
 
 @register
 class DropBox(DropWidget):
@@ -109,7 +153,7 @@ class DraggableBox(DropWidget):
     """
 
     _model_name = Unicode('DraggableBoxModel').tag(sync=True)
-    _view_name = Unicode('DraggableBoxView').tag(sync=True) 
+    _view_name = Unicode('DraggableBoxView').tag(sync=True)
     child = Instance(Widget, allow_none=True).tag(sync=True, **widget_serialization)
     draggable = Bool(True).tag(sync=True)
     drag_data = Dict().tag(sync=True)

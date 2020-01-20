@@ -142,6 +142,8 @@ class DropBoxView extends DragDropBoxViewBase {
     events(): {[e: string]: string} {
         return {
             'drop': '_handle_drop',
+            'dragenter': '_handle_dragenter',
+            'dragleave': '_handle_dragleave',
             'dragover': 'on_dragover'
         };
     }
@@ -159,7 +161,15 @@ class DropBoxView extends DragDropBoxViewBase {
             }
         }
 
-        this.send({event: 'drop', data: datamap});
+        this.send({event: name, data: datamap});
+    }
+
+    _handle_dragenter(event: DragEvent): void {
+        this.send({event: 'dragenter'});
+    }
+
+    _handle_dragleave(event: DragEvent): void {
+        this.send({event: 'dragleave'});
     }
 
     on_dragover(event: DragEvent): void {
