@@ -161,7 +161,7 @@ class DropBoxView extends DragDropBoxViewBase {
             }
         }
 
-        this.send({event: name, data: datamap});
+        this.send({event: 'drop', data: datamap});
     }
 
     _handle_dragenter(event: DragEvent): void {
