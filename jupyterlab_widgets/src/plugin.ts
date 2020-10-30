@@ -2,7 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import * as nbformat from '@jupyterlab/nbformat';
+
+import { IConsoleTracker, CodeConsole } from '@jupyterlab/console';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
@@ -34,7 +37,11 @@ import { AttachedProperty } from '@lumino/properties';
 
 import { WidgetRenderer } from './renderer';
 
-import { WidgetManager, WIDGET_VIEW_MIMETYPE } from './manager';
+import {
+  WidgetManager,
+  WIDGET_VIEW_MIMETYPE,
+  KernelWidgetManager,
+} from './manager';
 
 import { OutputModel, OutputView, OUTPUT_WIDGET_VERSION } from './output';
 
@@ -58,10 +65,29 @@ const SETTINGS: WidgetManager.Settings = { saveState: false };
 /**
  * Iterate through all widget renderers in a notebook.
  */
-function* widgetRenderers(
+function* notebookWidgetRenderers(
   nb: Notebook
 ): Generator<WidgetRenderer, void, unknown> {
   for (const cell of nb.widgets) {
+    if (cell.model.type === 'code') {
+      for (const codecell of (cell as CodeCell).outputArea.widgets) {
+        for (const output of toArray(codecell.children())) {
+          if (output instanceof WidgetRenderer) {
+            yield output;
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Iterate through all widget renderers in a console.
+ */
+function* consoleWidgetRenderers(
+  console: CodeConsole
+): Generator<WidgetRenderer, void, unknown> {
+  for (const cell of toArray(console.cells)) {
     if (cell.model.type === 'code') {
       for (const codecell of (cell as CodeCell).outputArea.widgets) {
         for (const output of toArray(codecell.children())) {
@@ -140,13 +166,58 @@ export function registerWidgetManager(
   });
 }
 
+export function registerConsoleWidgetManager(
+  console: CodeConsole,
+  rendermime: IRenderMimeRegistry,
+  renderers: IterableIterator<WidgetRenderer>
+): DisposableDelegate {
+  let wManager = Private.widgetManagerProperty.get(console);
+  if (!wManager) {
+    wManager = new KernelWidgetManager(
+      console.sessionContext.session?.kernel!,
+      rendermime
+    );
+    WIDGET_REGISTRY.forEach((data) => wManager!.register(data));
+    Private.widgetManagerProperty.set(console, wManager);
+  }
+
+  for (const r of renderers) {
+    r.manager = wManager;
+  }
+
+  // Replace the placeholder widget renderer with one bound to this widget
+  // manager.
+  rendermime.removeMimeType(WIDGET_VIEW_MIMETYPE);
+  rendermime.addFactory(
+    {
+      safe: false,
+      mimeTypes: [WIDGET_VIEW_MIMETYPE],
+      createRenderer: (options) => new WidgetRenderer(options, wManager),
+    },
+    0
+  );
+
+  return new DisposableDelegate(() => {
+    if (rendermime) {
+      rendermime.removeMimeType(WIDGET_VIEW_MIMETYPE);
+    }
+    wManager!.dispose();
+  });
+}
+
 /**
  * The widget manager provider.
  */
 const plugin: JupyterFrontEndPlugin<base.IJupyterWidgetRegistry> = {
   id: '@jupyter-widgets/jupyterlab-manager:plugin',
   requires: [IRenderMimeRegistry],
-  optional: [INotebookTracker, ISettingRegistry, IMainMenu, ILoggerRegistry],
+  optional: [
+    INotebookTracker,
+    IConsoleTracker,
+    ISettingRegistry,
+    IMainMenu,
+    ILoggerRegistry,
+  ],
   provides: base.IJupyterWidgetRegistry,
   activate: activateWidgetExtension,
   autoStart: true,
@@ -165,6 +236,7 @@ function activateWidgetExtension(
   app: JupyterFrontEnd,
   rendermime: IRenderMimeRegistry,
   tracker: INotebookTracker | null,
+  consoleTracker: IConsoleTracker | null,
   settingRegistry: ISettingRegistry | null,
   menu: IMainMenu | null,
   loggerRegistry: ILoggerRegistry | null
@@ -179,7 +251,10 @@ function activateWidgetExtension(
     const wManager = Private.widgetManagerProperty.get(nb.context);
     if (wManager) {
       wManager.onUnhandledIOPubMessage.connect(
-        (sender: WidgetManager, msg: KernelMessage.IIOPubMessage) => {
+        (
+          sender: WidgetManager | KernelWidgetManager,
+          msg: KernelMessage.IIOPubMessage
+        ) => {
           const logger = loggerRegistry.getLogger(nb.context.path);
           let level: LogLevel = 'warning';
           if (
@@ -226,7 +301,7 @@ function activateWidgetExtension(
         panel.context,
         panel.content.rendermime,
         chain(
-          widgetRenderers(panel.content),
+          notebookWidgetRenderers(panel.content),
           outputViews(app, panel.context.path)
         )
       );
@@ -238,7 +313,7 @@ function activateWidgetExtension(
         panel.context,
         panel.content.rendermime,
         chain(
-          widgetRenderers(panel.content),
+          notebookWidgetRenderers(panel.content),
           outputViews(app, panel.context.path)
         )
       );
@@ -247,6 +322,24 @@ function activateWidgetExtension(
     });
   }
 
+  if (consoleTracker !== null) {
+    consoleTracker.forEach(async (panel) => {
+      await panel.sessionContext.ready;
+      registerConsoleWidgetManager(
+        panel.console,
+        panel.console.rendermime,
+        chain(consoleWidgetRenderers(panel.console))
+      );
+    });
+    consoleTracker.widgetAdded.connect(async (sender, panel) => {
+      await panel.sessionContext.ready;
+      registerConsoleWidgetManager(
+        panel.console,
+        panel.console.rendermime,
+        chain(consoleWidgetRenderers(panel.console))
+      );
+    });
+  }
   if (settingRegistry !== null) {
     // Add a command for automatically saving (jupyter-)widget state.
     commands.addCommand('@jupyter-widgets/jupyterlab-manager:saveWidgetState', {
@@ -321,10 +414,11 @@ namespace Private {
    * A private attached property for a widget manager.
    */
   export const widgetManagerProperty = new AttachedProperty<
-    DocumentRegistry.Context,
-    WidgetManager | undefined
+    DocumentRegistry.Context | CodeConsole,
+    WidgetManager | KernelWidgetManager | undefined
   >({
     name: 'widgetManager',
-    create: (owner: DocumentRegistry.Context): undefined => undefined,
+    create: (owner: DocumentRegistry.Context | CodeConsole): undefined =>
+      undefined,
   });
 }
