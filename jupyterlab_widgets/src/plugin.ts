@@ -33,8 +33,6 @@ import { toArray, filter } from '@lumino/algorithm';
 
 import { DisposableDelegate } from '@lumino/disposable';
 
-import { AttachedProperty } from '@lumino/properties';
-
 import { WidgetRenderer } from './renderer';
 
 import {
@@ -89,8 +87,7 @@ function* consoleWidgetRenderers(
 ): Generator<WidgetRenderer, void, unknown> {
   for (const cell of toArray(console.cells)) {
     if (cell.model.type === 'code') {
-      for (const codecell of ((cell as unknown) as CodeCell).outputArea
-        .widgets) {
+      for (const codecell of (cell as unknown as CodeCell).outputArea.widgets) {
         for (const output of toArray(codecell.children())) {
           if (output instanceof WidgetRenderer) {
             yield output;
@@ -136,11 +133,11 @@ export function registerWidgetManager(
   rendermime: IRenderMimeRegistry,
   renderers: IterableIterator<WidgetRenderer>
 ): DisposableDelegate {
-  let wManager = Private.widgetManagerProperty.get(context);
+  let wManager = Private.widgetManagerProperty.get(context.sessionContext.path);
   if (!wManager) {
     wManager = new WidgetManager(context, rendermime, SETTINGS);
     WIDGET_REGISTRY.forEach((data) => wManager!.register(data));
-    Private.widgetManagerProperty.set(context, wManager);
+    Private.widgetManagerProperty.set(context.sessionContext.path, wManager);
   }
 
   for (const r of renderers) {
@@ -172,14 +169,14 @@ export function registerConsoleWidgetManager(
   rendermime: IRenderMimeRegistry,
   renderers: IterableIterator<WidgetRenderer>
 ): DisposableDelegate {
-  let wManager = Private.widgetManagerProperty.get(console);
+  let wManager = Private.widgetManagerProperty.get(console.sessionContext.path);
   if (!wManager) {
     wManager = new KernelWidgetManager(
       console.sessionContext.session?.kernel!,
       rendermime
     );
     WIDGET_REGISTRY.forEach((data) => wManager!.register(data));
-    Private.widgetManagerProperty.set(console, wManager);
+    Private.widgetManagerProperty.set(console.sessionContext.path, wManager);
   }
 
   for (const r of renderers) {
@@ -249,7 +246,9 @@ function activateWidgetExtension(
       return;
     }
 
-    const wManager = Private.widgetManagerProperty.get(nb.context);
+    const wManager = Private.widgetManagerProperty.get(
+      nb.context.sessionContext.path
+    );
     if (wManager) {
       wManager.onUnhandledIOPubMessage.connect(
         (
@@ -414,12 +413,8 @@ namespace Private {
   /**
    * A private attached property for a widget manager.
    */
-  export const widgetManagerProperty = new AttachedProperty<
-    DocumentRegistry.Context | CodeConsole,
+  export const widgetManagerProperty = new Map<
+    string,
     WidgetManager | KernelWidgetManager | undefined
-  >({
-    name: 'widgetManager',
-    create: (owner: DocumentRegistry.Context | CodeConsole): undefined =>
-      undefined,
-  });
+  >();
 }
