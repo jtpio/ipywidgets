@@ -37,6 +37,8 @@ jobs:
         python setup.py sdist bdist_wheel
     - name: Build PyPI distributions for jupyterlab_widgets
       run: |
+        jlpm
+        jlpm run build
         cd jupyterlab_widgets
         python setup.py sdist bdist_wheel
         cp ./dist/* ../dist
