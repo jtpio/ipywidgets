@@ -96,6 +96,8 @@ jobs:
           ${{ matrix.py_cmd }} -m pip check
       - name: Validate the install
         run: |
+          pip install jupyterlab~=3.0
+          
           jupyter labextension list
           jupyter labextension list 2>&1 | grep -ie "@jupyter-widgets/jupyterlab-manager.*enabled.*ok" -
 
