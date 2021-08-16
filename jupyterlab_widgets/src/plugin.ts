@@ -141,7 +141,7 @@ async function getWidgetManagerOwner(
   sessionContext: ISessionContext
 ): Promise<Private.IWidgetManagerOwner> {
   await sessionContext.ready;
-  return sessionContext.session!.kernel!.id;
+  return sessionContext.session?.kernel?.id;
 }
 
 /**
@@ -165,7 +165,7 @@ async function registerWidgetHandler(
 ): Promise<DisposableDelegate> {
   const wManagerOwner = await getWidgetManagerOwner(sessionContext);
   let wManager = Private.widgetManagerProperty.get(wManagerOwner);
-  let currentOwner: string;
+  let currentOwner: Private.IWidgetManagerOwner;
 
   if (!wManager) {
     wManager = widgetManagerFactory();
@@ -452,7 +452,7 @@ namespace Private {
   /**
    * A type alias for keys of `widgetManagerProperty` .
    */
-  export type IWidgetManagerOwner = string;
+  export type IWidgetManagerOwner = string | undefined;
 
   /**
    * A type alias for values of `widgetManagerProperty` .
