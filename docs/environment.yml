@@ -33,9 +33,7 @@ dependencies:
   - scikit-image
   - scikit-learn
   - sympy
+  - jupyterlite >=0.1.0,<0.2.0
   # jupyterlite dependencies
-  - doit
   - pkginfo
   - python-libarchive-c
-  - pip:
-      - jupyterlite ==0.1.0b18
