@@ -66,12 +66,21 @@ class TestOutputWidget(TestCase):
 
     def test_set_parent_when_capturing(self):
         msg_id = 'msg-id'
-        parent = {'header': {'msg_id': msg_id}}
+        shell_parent = {'header': {'msg_id': msg_id}}
+        kernel_parent = {'header': {'msg_id': 'kernel-msg-id'}}
         parent_calls = []
-        kernel = type('mock_kernel', (object, ), {})()
+
+        def get_kernel_parent(self_):
+            return kernel_parent
+
+        kernel = type(
+            'mock_kernel',
+            (object, ),
+            {'get_parent': get_kernel_parent}
+        )()
 
         def get_parent(self_):
-            return parent
+            return shell_parent
 
         def set_parent(self_, parent):
             parent_calls.append(parent)
@@ -88,7 +97,7 @@ class TestOutputWidget(TestCase):
             with widget:
                 assert widget.msg_id == msg_id
 
-        assert parent_calls == [parent]
+        assert parent_calls == [shell_parent]
 
     def test_clear_output(self):
         msg_id = 'msg-id'

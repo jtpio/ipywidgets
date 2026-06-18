@@ -52,17 +52,24 @@ test.describe('Widget Visual Regression', () => {
     await page.notebook.openByPath(`${tmpPath}/${notebook}`);
     await page.notebook.activate(notebook);
 
+    const widgetOutput = page.locator('.jp-Notebook .widget-output');
     await page.notebook.runCellByCell({
       onAfterCellRun: async (cellIndex: number) => {
-        if (cellIndex === 0) {
-          await page
-            .getByRole('button', { name: 'Start background thread' })
-            .click();
-          await expect(
-            page.locator('.jp-Notebook .widget-output')
-          ).toContainText('captured from background thread');
+        if (cellIndex === 1) {
+          await expect(widgetOutput).toContainText('0');
         }
       },
     });
+
+    await expect(widgetOutput).toHaveText('0 1 2 3 4 5 6 7 8 9', {
+      timeout: 10_000,
+    });
+
+    expect(await page.notebook.getCellTextOutput(2)).toEqual([
+      "'first foreground cell'",
+    ]);
+    expect(await page.notebook.getCellTextOutput(3)).toEqual([
+      "'second foreground cell'",
+    ]);
   });
 });
