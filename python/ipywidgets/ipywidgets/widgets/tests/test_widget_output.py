@@ -64,6 +64,41 @@ class TestOutputWidget(TestCase):
                 assert widget.msg_id == msg_id
             assert widget.msg_id == ''
 
+    def test_set_parent_when_capturing(self):
+        msg_id = 'msg-id'
+        shell_parent = {'header': {'msg_id': msg_id}}
+        kernel_parent = {'header': {'msg_id': 'kernel-msg-id'}}
+        parent_calls = []
+
+        def get_kernel_parent(self_):
+            return kernel_parent
+
+        kernel = type(
+            'mock_kernel',
+            (object, ),
+            {'get_parent': get_kernel_parent}
+        )()
+
+        def get_parent(self_):
+            return shell_parent
+
+        def set_parent(self_, parent):
+            parent_calls.append(parent)
+
+        ipython = type(
+            'mock_ipython',
+            (object, ),
+            {'kernel': kernel, 'get_parent': get_parent, 'set_parent': set_parent}
+        )
+        clear_output = self._mock_clear_output()
+
+        with self._mocked_ipython(ipython, clear_output):
+            widget = widget_output.Output()
+            with widget:
+                assert widget.msg_id == msg_id
+
+        assert parent_calls == [shell_parent]
+
     def test_clear_output(self):
         msg_id = 'msg-id'
         get_ipython = self._mock_get_ipython(msg_id)

@@ -115,15 +115,30 @@ class Output(DOMWidget):
             kernel = self.comm.kernel
 
         if kernel:
-            parent = None
-            if hasattr(kernel, "get_parent"):
-                parent = kernel.get_parent()
-            elif hasattr(kernel, "_parent_header"):
-                # ipykernel < 6: kernel._parent_header is the parent *request*
-                parent = kernel._parent_header
+            parent_request = None
+            if ip and hasattr(ip, "get_parent"):
+                # Prefer the shell parent request so display hooks and streams
+                # are refreshed from the same message below.
+                shell_parent = ip.get_parent()
+                if shell_parent:
+                    parent_request = shell_parent
+            if not parent_request:
+                if hasattr(kernel, "get_parent"):
+                    # Fallback for contexts without an active shell parent:
+                    # ipykernel >= 6 keeps parent requests on the kernel.
+                    kernel_parent = kernel.get_parent()
+                elif hasattr(kernel, "_parent_header"):
+                    # ipykernel < 6: kernel._parent_header is the parent *request*
+                    kernel_parent = kernel._parent_header
+                else:
+                    kernel_parent = None
+                if kernel_parent:
+                    parent_request = kernel_parent
 
-            if parent and parent.get("header"):
-                self.msg_id = parent["header"]["msg_id"]
+            if parent_request and parent_request.get("header"):
+                if ip and hasattr(ip, "set_parent"):
+                    ip.set_parent(parent_request)
+                self.msg_id = parent_request["header"]["msg_id"]
                 self.__counter += 1
 
     def __exit__(self, etype, evalue, tb):

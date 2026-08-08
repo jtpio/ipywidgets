@@ -43,4 +43,33 @@ test.describe('Widget Visual Regression', () => {
       expect.soft(captures[i]).toMatchSnapshot(image);
     }
   });
+
+  test('captures Output widget output from background threads', async ({
+    page,
+    tmpPath,
+  }) => {
+    const notebook = 'output-background-thread.ipynb';
+    await page.notebook.openByPath(`${tmpPath}/${notebook}`);
+    await page.notebook.activate(notebook);
+
+    const widgetOutput = page.locator('.jp-Notebook .widget-output');
+    await page.notebook.runCellByCell({
+      onAfterCellRun: async (cellIndex: number) => {
+        if (cellIndex === 1) {
+          await expect(widgetOutput).toContainText('0');
+        }
+      },
+    });
+
+    await expect(widgetOutput).toHaveText('0 1 2 3 4 5 6 7 8 9', {
+      timeout: 10_000,
+    });
+
+    expect(await page.notebook.getCellTextOutput(2)).toEqual([
+      "'first foreground cell'",
+    ]);
+    expect(await page.notebook.getCellTextOutput(3)).toEqual([
+      "'second foreground cell'",
+    ]);
+  });
 });
