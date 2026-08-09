@@ -164,6 +164,9 @@ templates_path = ["_templates"]
 htmlhelp_basename = 'ipywidgetsdoc'
 
 html_theme_options = {
+    # The banner will not show if https://jupyter.org/assets/banner.html is empty.
+    # See https://github.com/jupyter/jupyter.github.io#site-wide-announcement-banner
+    "announcement": "https://jupyter.org/assets/banner.html",
     "icon_links": [
         {
             "name": "PyPI",
