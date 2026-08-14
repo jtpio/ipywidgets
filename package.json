@@ -18,7 +18,6 @@
     "eslint": "eslint . --fix --ignore-path .gitignore --ext .ts,.tsx",
     "eslint:check": "eslint . --ignore-path .gitignore --ext .ts,.tsx",
     "integrity": "node scripts/package-integrity.js",
-    "integrity2": "node buildutils/lib/integrity.js",
     "lint": "yarn && yarn prettier && yarn eslint",
     "lint:check": "yarn prettier:check && yarn eslint:check",
     "prettier": "yarn prettier:base --list-different --write",
@@ -38,10 +37,11 @@
     }
   },
   "resolutions": {
-    "typescript": "~4.9.4"
+    "typescript": "~4.9.4",
+    "@types/d3-dispatch": "3.0.6"
   },
   "devDependencies": {
-    "@jupyterlab/buildutils": "^3.5.2 || ^4.0.0",
+    "@jupyterlab/buildutils": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^5.48.2",
     "@typescript-eslint/parser": "^5.48.2",
     "eslint": "^8.32.0",
