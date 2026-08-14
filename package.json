@@ -37,7 +37,7 @@
     }
   },
   "resolutions": {
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^4.0.0",
@@ -54,7 +54,7 @@
     "rimraf": "^5.0.1",
     "sort-package-json": "^2.1.0",
     "typedoc": "~0.28.20",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   },
   "engines": {
     "node": ">=18 <25",

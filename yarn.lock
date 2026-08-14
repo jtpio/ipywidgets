@@ -801,7 +801,7 @@ __metadata:
     sanitize-html: ^2.3
     sinon: ^12.0.1
     sinon-chai: ^3.3.0
-    typescript: ~5.9.3
+    typescript: ~6.0.3
     webpack: ^5.65.0
   languageName: unknown
   linkType: soft
@@ -862,7 +862,7 @@ __metadata:
     rimraf: ^3.0.2
     sinon: ^12.0.1
     sinon-chai: ^3.3.0
-    typescript: ~5.9.3
+    typescript: ~6.0.3
     webpack: ^5.65.0
   languageName: unknown
   linkType: soft
@@ -931,7 +931,7 @@ __metadata:
     sinon: ^12.0.1
     sinon-chai: ^3.3.0
     style-loader: ^3.3.1
-    typescript: ~5.9.3
+    typescript: ~6.0.3
     webpack: ^5.65.0
   languageName: unknown
   linkType: soft
@@ -989,7 +989,7 @@ __metadata:
     http-server: ^14.0.0
     rimraf: ^3.0.2
     style-loader: ^3.3.1
-    typescript: ~5.9.3
+    typescript: ~6.0.3
     webpack: ^5.65.0
   languageName: unknown
   linkType: soft
@@ -1045,7 +1045,7 @@ __metadata:
     rimraf: ^3.0.2
     semver: ^7.3.5
     style-loader: ^3.3.1
-    typescript: ~5.9.3
+    typescript: ~6.0.3
     webpack: ^5.65.0
     webpack-cli: ^4.7.2
   languageName: unknown
@@ -1082,6 +1082,7 @@ __metadata:
     "@lumino/widgets": ^2.0.0
     "@types/backbone": 1.4.14
     "@types/jquery": ^3.5.16
+    "@types/node": ^17.0.2
     "@types/semver": ^7.3.6
     "@typescript-eslint/eslint-plugin": ^8.67.0
     "@typescript-eslint/parser": ^8.67.0
@@ -1094,7 +1095,7 @@ __metadata:
     rimraf: ^3.0.2
     semver: ^7.3.5
     source-map-loader: ^4.0.1
-    typescript: ~5.9.3
+    typescript: ~6.0.3
   languageName: unknown
   linkType: soft
 
@@ -1126,7 +1127,7 @@ __metadata:
   dependencies:
     "@jupyter-widgets/base": ^6.0.11
     rimraf: ^3.0.2
-    typescript: ~5.9.3
+    typescript: ~6.0.3
   languageName: unknown
   linkType: soft
 
@@ -15513,7 +15514,7 @@ __metadata:
     rimraf: ^5.0.1
     sort-package-json: ^2.1.0
     typedoc: ~0.28.20
-    typescript: ~5.9.3
+    typescript: ~6.0.3
   languageName: unknown
   linkType: soft
 
@@ -17197,23 +17198,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~5.9.3":
-  version: 5.9.3
-  resolution: "typescript@npm:5.9.3"
+"typescript@npm:~6.0.3":
+  version: 6.0.3
+  resolution: "typescript@npm:6.0.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 0d0ffb84f2cd072c3e164c79a2e5a1a1f4f168e84cb2882ff8967b92afe1def6c2a91f6838fb58b168428f9458c57a2ba06a6737711fdd87a256bbe83e9a217f
+  checksum: c1182dfadf8a8cb22a4e32442715afef1af1b950ae635b1c52c27e0d7fb7a5e2607ed7c7c4079bba4163579250e02445fd8d46b09cbceda71ff72a5b7d69db61
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A~5.9.3#~builtin<compat/typescript>":
-  version: 5.9.3
-  resolution: "typescript@patch:typescript@npm%3A5.9.3#~builtin<compat/typescript>::version=5.9.3&hash=85af82"
+"typescript@patch:typescript@npm%3A~6.0.3#~builtin<compat/typescript>":
+  version: 6.0.3
+  resolution: "typescript@patch:typescript@npm%3A6.0.3#~builtin<compat/typescript>::version=6.0.3&hash=85af82"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 8bb8d86819ac86a498eada254cad7fb69c5f74778506c700c2a712daeaff21d3a6f51fd0d534fe16903cb010d1b74f89437a3d02d4d0ff5ca2ba9a4660de8497
+  checksum: 8ed159a81ab4901a620c19fda539632cee610f8ec34dde57a3acc6b6df72894ad0b50bdd1946b763313d9b73dedb019d2e81c03eff06c0f2c785cde30a537d15
   languageName: node
   linkType: hard
 
