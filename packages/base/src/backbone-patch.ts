@@ -60,7 +60,7 @@ export function set(
     attrs = key;
     options = val;
   } else {
-    (attrs = {} as ObjectHash)[key] = val;
+    (attrs = {} as ObjectHash)[key as string] = val;
   }
 
   options || (options = {});

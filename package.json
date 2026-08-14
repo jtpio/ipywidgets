@@ -37,14 +37,13 @@
     }
   },
   "resolutions": {
-    "typescript": "~4.9.4",
-    "@types/d3-dispatch": "3.0.6"
+    "typescript": "~5.9.3"
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^4.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.48.2",
-    "@typescript-eslint/parser": "^5.48.2",
-    "eslint": "^8.32.0",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "glob": "^10.2.4",
@@ -54,8 +53,8 @@
     "prettier": "^2.8.3",
     "rimraf": "^5.0.1",
     "sort-package-json": "^2.1.0",
-    "typedoc": "~0.23.24",
-    "typescript": "~4.9.4"
+    "typedoc": "~0.28.20",
+    "typescript": "~5.9.3"
   },
   "engines": {
     "node": ">=18 <25",
