@@ -190,7 +190,9 @@ export function remove_buffers(
               obj = obj.slice();
               is_cloned = true;
             }
-            buffers.push(ArrayBuffer.isView(value) ? value.buffer : value);
+            buffers.push(
+              (ArrayBuffer.isView(value) ? value.buffer : value) as ArrayBuffer
+            );
             buffer_paths.push(path.concat([i]));
             // easier to just keep the array, but clear the entry, otherwise we have to think
             // about array length, much easier this way
@@ -219,7 +221,11 @@ export function remove_buffers(
                 obj = { ...obj };
                 is_cloned = true;
               }
-              buffers.push(ArrayBuffer.isView(value) ? value.buffer : value);
+              buffers.push(
+                (ArrayBuffer.isView(value)
+                  ? value.buffer
+                  : value) as ArrayBuffer
+              );
               buffer_paths.push(path.concat([key]));
               delete obj[key]; // for objects/dicts we just delete them
             } else {

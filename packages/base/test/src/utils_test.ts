@@ -17,7 +17,9 @@ describe('remove_buffers', function () {
     const rawState = {
       buffer: floatArray,
     };
-    const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+    const { state, buffers, buffer_paths } = utils.remove_buffers(
+      rawState as any
+    );
     expect(state).to.eql({});
     expect(buffers).to.deep.equal([floatArray.buffer]);
     expect(buffer_paths).to.deep.equal([['buffer']]);
@@ -27,7 +29,9 @@ describe('remove_buffers', function () {
     const rawState = {
       buffer: uintArray,
     };
-    const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+    const { state, buffers, buffer_paths } = utils.remove_buffers(
+      rawState as any
+    );
     expect(state).to.eql({});
     expect(buffers).to.deep.equal([uintArray.buffer]);
     expect(buffer_paths).to.deep.equal([['buffer']]);
@@ -37,7 +41,9 @@ describe('remove_buffers', function () {
     const rawState = {
       buffer: new DataView(floatArray.buffer),
     };
-    const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+    const { state, buffers, buffer_paths } = utils.remove_buffers(
+      rawState as any
+    );
     expect(state).to.eql({});
     expect(buffers).to.deep.equal([floatArray.buffer]);
     expect(buffer_paths).to.deep.equal([['buffer']]);
@@ -47,7 +53,9 @@ describe('remove_buffers', function () {
     const rawState = {
       buffer: floatArray.buffer,
     };
-    const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+    const { state, buffers, buffer_paths } = utils.remove_buffers(
+      rawState as any
+    );
     expect(state).to.eql({});
     expect(buffers).to.deep.equal([floatArray.buffer]);
     expect(buffer_paths).to.deep.equal([['buffer']]);
@@ -55,7 +63,9 @@ describe('remove_buffers', function () {
 
   it('extracts buffers from an array', function () {
     const rawState = [uintArray, floatArray.buffer];
-    const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+    const { state, buffers, buffer_paths } = utils.remove_buffers(
+      rawState as any
+    );
     expect(state).to.deep.equal([null, null]);
     expect(buffers).to.deep.equal([uintArray.buffer, floatArray.buffer]);
     expect(buffer_paths).to.deep.equal([[0], [1]]);
@@ -66,7 +76,9 @@ describe('remove_buffers', function () {
       const rawState = {
         buffers: [uintArray, floatArray.buffer],
       };
-      const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+      const { state, buffers, buffer_paths } = utils.remove_buffers(
+        rawState as any
+      );
       expect(state).to.deep.equal({ buffers: [null, null] });
       expect(buffers).to.deep.equal([uintArray.buffer, floatArray.buffer]);
       expect(buffer_paths).to.deep.equal([
@@ -77,7 +89,9 @@ describe('remove_buffers', function () {
 
     it('object in array', function () {
       const rawState = [{ buffer: uintArray }, { buffer: floatArray.buffer }];
-      const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+      const { state, buffers, buffer_paths } = utils.remove_buffers(
+        rawState as any
+      );
       expect(state).to.deep.equal([{}, {}]);
       expect(buffers).to.deep.equal([uintArray.buffer, floatArray.buffer]);
       expect(buffer_paths).to.deep.equal([
@@ -88,7 +102,9 @@ describe('remove_buffers', function () {
 
     it('array in array', function () {
       const rawState = ['string', 45, [uintArray, floatArray.buffer]];
-      const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+      const { state, buffers, buffer_paths } = utils.remove_buffers(
+        rawState as any
+      );
       expect(state).to.deep.equal(['string', 45, [null, null]]);
       expect(buffers).to.deep.equal([uintArray.buffer, floatArray.buffer]);
       expect(buffer_paths).to.deep.equal([
@@ -106,7 +122,9 @@ describe('remove_buffers', function () {
           bufferB: floatArray.buffer,
         },
       };
-      const { state, buffers, buffer_paths } = utils.remove_buffers(rawState);
+      const { state, buffers, buffer_paths } = utils.remove_buffers(
+        rawState as any
+      );
       expect(state).to.deep.equal({ a: 'string', b: 45, buffers: {} });
       expect(buffers).to.deep.equal([uintArray.buffer, floatArray.buffer]);
       expect(buffer_paths).to.deep.equal([

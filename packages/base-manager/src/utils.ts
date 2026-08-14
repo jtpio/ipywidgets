@@ -296,5 +296,5 @@ export function bufferToBase64(buffer: ArrayBuffer): string {
  * Convert a base64 string to an ArrayBuffer.
  */
 export function base64ToBuffer(base64: string): ArrayBuffer {
-  return toByteArray(base64).buffer;
+  return toByteArray(base64).buffer as ArrayBuffer;
 }
