@@ -19,15 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.x'
           architecture: 'x64'
 
-      - uses: actions/cache@v3
+      - name: Install Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}
@@ -83,33 +88,33 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu, windows]
-        python: ['3.9', '3.13']
+        python: ['3.10', '3.x']
         dist: ['ipywidgets*.tar.gz']
         include:
-          - python: '3.13'
+          - python: '3.x'
             dist: 'jupyterlab_widgets*.tar.gz'
             os: 'ubuntu'
-          - python: '3.13'
+          - python: '3.x'
             dist: 'widgetsnbextension*.tar.gz'
             os: 'ubuntu'
-          - python: '3.13'
+          - python: '3.x'
             dist: 'ipywidgets*.whl'
             os: 'ubuntu'
     steps:
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           architecture: 'x64'
       - name: Checkout # For the cache keys
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Get pip cache dir
         id: pip-cache
         run: |
           echo "::set-output name=dir::$(pip cache dir)"
       - name: pip cache
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ${{ steps.pip-cache.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.py') }}

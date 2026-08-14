@@ -7,15 +7,19 @@ jobs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.12'
+          python-version: '3.x'
           cache: 'pip'
           cache-dependency-path: |
             **/setup.cfg
             **/requirements*.txt
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
       - name: Install dependencies
         run: |
           sudo apt-get install -y pandoc
@@ -30,15 +34,19 @@ jobs:
     name: JavaScript
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.x'
           cache: 'pip'
           cache-dependency-path: |
             **/setup.cfg
             **/requirements*.txt
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -77,12 +85,12 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.x']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -104,15 +112,19 @@ jobs:
     name: Message Specification
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.x'
           cache: 'pip'
           cache-dependency-path: |
             **/setup.cfg
             **/requirements*.txt
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -135,15 +147,19 @@ jobs:
         jupyterlab: ['==4.0.*', '']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.x'
           cache: 'pip'
           cache-dependency-path: |
             **/setup.cfg
             **/requirements*.txt
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
 
       - name: Install dependencies
         run: |
@@ -173,15 +189,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.x'
           cache: 'pip'
           cache-dependency-path: |
             **/setup.cfg
             **/requirements*.txt
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
 
       - name: Install dependencies
         run: |
