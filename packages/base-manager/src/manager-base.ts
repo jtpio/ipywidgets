@@ -233,6 +233,27 @@ export abstract class ManagerBase implements IWidgetManager {
   }
 
   /**
+   * Get a promise for a model by model id, waiting if necessary for it to be
+   * registered.
+   *
+   * #### Notes
+   * Unlike `get_model`, this does not reject when the model is not registered
+   * yet. The promise rejects only if the widget state is cleared first.
+   */
+  get_model_when_available(model_id: string): Promise<WidgetModel> {
+    const modelPromise = this._models[model_id];
+    if (modelPromise !== undefined) {
+      return modelPromise;
+    }
+    let waiter = this._modelWaiters.get(model_id);
+    if (waiter === undefined) {
+      waiter = new PromiseDelegate<WidgetModel>();
+      this._modelWaiters.set(model_id, waiter);
+    }
+    return waiter.promise;
+  }
+
+  /**
    * Handle when a comm is opened.
    */
   handle_comm_open(
@@ -329,6 +350,11 @@ export abstract class ManagerBase implements IWidgetManager {
 
   register_model(model_id: string, modelPromise: Promise<WidgetModel>): void {
     this._models[model_id] = modelPromise;
+    const waiter = this._modelWaiters.get(model_id);
+    if (waiter !== undefined) {
+      this._modelWaiters.delete(model_id);
+      waiter.resolve(modelPromise);
+    }
     modelPromise.then((model) => {
       model.once('comm:close', () => {
         delete this._models[model_id];
@@ -630,6 +656,10 @@ export abstract class ManagerBase implements IWidgetManager {
     return resolvePromisesDict(this._models).then((models) => {
       Object.keys(models).forEach((id) => models[id].close());
       this._models = Object.create(null);
+      this._modelWaiters.forEach((waiter) =>
+        waiter.reject(new Error('widget model not found'))
+      );
+      this._modelWaiters.clear();
     });
   }
 
@@ -863,6 +893,12 @@ export abstract class ManagerBase implements IWidgetManager {
    */
   private _models: { [key: string]: Promise<WidgetModel> } =
     Object.create(null);
+
+  /**
+   * Dictionary of model ids and waiters for models that are not registered
+   * yet
+   */
+  private _modelWaiters = new Map<string, PromiseDelegate<WidgetModel>>();
 }
 
 export interface IStateOptions {

@@ -31,15 +31,24 @@ export class WidgetRenderer
   }
 
   /**
+   * How long (in ms) to wait for a widget model before showing "model not
+   * found". The renderer keeps waiting, and renders a model that registers
+   * later.
+   */
+  static modelTimeout = 5000;
+
+  /**
    * The widget manager.
    */
   set manager(value: LabWidgetManager) {
-    value.restored.connect(this._rerender, this);
     this._manager.resolve(value);
   }
 
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     const source: any = model.data[this.mimeType];
+
+    // Supersede any earlier render that still waits for its model.
+    const epoch = ++this._renderEpoch;
 
     // Let's be optimistic, and hope the widget state will come later.
     this.node.textContent = 'Loading widget...';
@@ -51,39 +60,49 @@ export class WidgetRenderer
       return Promise.resolve();
     }
 
+    // The comm_open message that creates the model can arrive after the
+    // output is rendered, so show the error but keep waiting for the model.
+    const timer = setTimeout(() => {
+      if (!this._isStale(epoch)) {
+        this._showModelNotFound();
+      }
+    }, WidgetRenderer.modelTimeout);
+
     let wModel: DOMWidgetModel;
     try {
       // Presume we have a DOMWidgetModel. Should we check for sure?
-      wModel = (await manager.get_model(source.model_id)) as DOMWidgetModel;
+      wModel = (await manager.get_model_when_available(
+        source.model_id
+      )) as DOMWidgetModel;
     } catch (err) {
-      if (manager.restoredStatus) {
-        // The manager has been restored, so this error won't be going away.
-        this.node.textContent = 'Error displaying widget: model not found';
-        this.addClass('jupyter-widgets');
+      if (!this._isStale(epoch)) {
+        this._showModelNotFound();
         console.error(err);
-        return;
       }
-
-      // Store the model for a possible rerender
-      this._rerenderMimeModel = model;
       return;
+    } finally {
+      clearTimeout(timer);
     }
-
-    // Successful getting the model, so we don't need to try to rerender.
-    this._rerenderMimeModel = null;
 
     let widget: LuminoWidget;
     try {
       const view = await manager.create_view(wModel);
       widget = view.luminoWidget || view.pWidget;
     } catch (err) {
-      this.node.textContent = 'Error displaying widget';
-      this.addClass('jupyter-widgets');
-      console.error(err);
+      if (!this._isStale(epoch)) {
+        this.node.textContent = 'Error displaying widget';
+        this.addClass('jupyter-widgets');
+        console.error(err);
+      }
+      return;
+    }
+    if (this._isStale(epoch)) {
+      widget.dispose();
       return;
     }
 
-    // Clear any previous loading message.
+    // Clear any previous error or loading message.
+    this.removeClass('jupyter-widgets');
     this.node.textContent = '';
     this.addWidget(widget);
 
@@ -106,15 +125,16 @@ export class WidgetRenderer
     super.dispose();
   }
 
-  private _rerender(): void {
-    if (this._rerenderMimeModel) {
-      // Clear the error message
-      this.node.textContent = '';
-      this.removeClass('jupyter-widgets');
+  /**
+   * Whether a newer render superseded this one, or the renderer went away.
+   */
+  private _isStale(epoch: number): boolean {
+    return this.isDisposed || epoch !== this._renderEpoch;
+  }
 
-      // Attempt to rerender.
-      this.renderModel(this._rerenderMimeModel);
-    }
+  private _showModelNotFound(): void {
+    this.node.textContent = 'Error displaying widget: model not found';
+    this.addClass('jupyter-widgets');
   }
 
   /**
@@ -122,5 +142,5 @@ export class WidgetRenderer
    */
   readonly mimeType: string;
   private _manager = new PromiseDelegate<LabWidgetManager>();
-  private _rerenderMimeModel: IRenderMime.IMimeModel | null = null;
+  private _renderEpoch = 0;
 }

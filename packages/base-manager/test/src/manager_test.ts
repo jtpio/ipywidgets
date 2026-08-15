@@ -164,6 +164,40 @@ describe('ManagerBase', function () {
     });
   });
 
+  describe('get_model_when_available', function () {
+    it('resolves immediately for a registered model', async function () {
+      const manager = this.managerBase;
+      const model = await manager.new_model(this.modelOptions);
+      expect(await manager.get_model_when_available(model.model_id)).to.equal(
+        model
+      );
+    });
+
+    it('resolves when the model is registered later', async function () {
+      const manager = this.managerBase;
+      const modelPromise = manager.get_model_when_available('u-u-i-d');
+      expect(manager.has_model('u-u-i-d')).to.be.false;
+      const model = await manager.new_model(this.modelOptions);
+      expect(await modelPromise).to.equal(model);
+    });
+
+    it('shares one waiter between concurrent calls', async function () {
+      const manager = this.managerBase;
+      const first = manager.get_model_when_available('u-u-i-d');
+      const second = manager.get_model_when_available('u-u-i-d');
+      const model = await manager.new_model(this.modelOptions);
+      expect(await first).to.equal(model);
+      expect(await second).to.equal(model);
+    });
+
+    it('rejects pending waiters when the state is cleared', async function () {
+      const manager = this.managerBase;
+      const pending = manager.get_model_when_available('not-defined');
+      await manager.clear_state();
+      await expect(pending).to.be.rejectedWith('widget model not found');
+    });
+  });
+
   describe('handle_comm_open', function () {
     it('returns a promise to a model', async function () {
       const manager = this.managerBase;
