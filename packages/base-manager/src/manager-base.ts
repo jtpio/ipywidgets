@@ -215,10 +215,27 @@ export abstract class ManagerBase implements IWidgetManager {
    * If you would like to synchronously test if a model exists, use .has_model().
    */
   async get_model(model_id: string): Promise<WidgetModel> {
-    const modelPromise = this._models[model_id];
+    let modelPromise = this._models[model_id];
+
     if (modelPromise === undefined) {
+      // If we don't have the model yet, try multiple times for 2 seconds
+      const timeout = 2000;
+      const interval = 100;
+      const start = Date.now();
+
+      while (Date.now() - start < timeout) {
+        modelPromise = this._models[model_id];
+
+        if (modelPromise !== undefined) {
+          return modelPromise;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, interval));
+      }
+
       throw new Error('widget model not found');
     }
+
     return modelPromise;
   }
 
