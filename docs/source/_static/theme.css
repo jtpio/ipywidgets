@@ -9,17 +9,44 @@ table.indextable tr.cap {
 }
 
 #demo-sidebar .demo-app {
-  display: inline;
+  margin: 0.75rem 0.25rem 0 0.25rem;
+}
+
+/* Strip the fieldset's default chrome */
+.demo-app > .demo-app-picker {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
   display: flex;
   flex-direction: row;
   align-items: baseline;
   flex-wrap: wrap;
-  margin: 0.75rem 0.25rem 0 0.25rem;
 }
 
-.demo-app > * {
+.demo-app-picker > label {
   flex: 1 auto;
   white-space: nowrap;
+}
+
+/* Keep the button on its own row under the app picker. */
+#demo-sidebar #demo-button {
+  display: block;
+  margin-top: 0.5rem;
+}
+
+/*
+ * The theme's link rules (a:link, a:visited, ...) outrank .btn-primary's text
+ * color, leaving the label unreadable on Jupyter-branded sites, where the link
+ * color is the Jupyter orange. Pin the label back to the button's own colors.
+ */
+#demo-sidebar #demo-button:link,
+#demo-sidebar #demo-button:visited,
+#demo-sidebar #demo-button:hover,
+#demo-sidebar #demo-button:focus,
+#demo-sidebar #demo-button:active {
+  color: var(--bs-btn-color);
+  text-decoration: none;
 }
 
 #demo-sidebar .admonition-title::after {
